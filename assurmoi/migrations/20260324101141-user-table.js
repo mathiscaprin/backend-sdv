@@ -5,7 +5,7 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      await queryInterface.createTable('User', {
+      await queryInterface.createTable('Users', {
         id: {
           allowNull: false,
           autoIncrement: true,
@@ -29,25 +29,31 @@ module.exports = {
           allowNull: true
         },
         email: {
-          type: Sequelize.STRING
+          type: Sequelize.STRING,
+          allowNull: false
         },
-        // person_id: {
-        //   type: Sequelize.INTEGER,
-        //   references: {
-        //     model: 'Person',
-        //     key: 'id'
-        //   }
-        // },
-        // updateAt: {
-        //   allowNull: false,
-        //   type: Sequelize.DATE,
-        //   defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-        // },
-        // createdAt: {
-        //   allowNull: false,
-        //   type: Sequelize.DATE,
-        //   defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-        // }
+        role: {
+          type: Sequelize.ENUM('admin', 'manager', 'account_manager', 'coordinator', 'policyholder'),
+          allowNull: false,
+          defaultValue: 'policyholder'
+        },
+        token: {
+          type: Sequelize.STRING,
+          allowNull: true
+        },
+        refresh_token: {
+          type: Sequelize.STRING,
+          allowNull: true
+        },
+        two_step_code: {
+          type: Sequelize.STRING,
+          allowNull: true
+        },
+        active: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
+          defaultValue: true
+        }
       }, { transaction })
       transaction.commit();
     } catch(err) {
@@ -56,6 +62,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('User')
+    await queryInterface.dropTable('Users')
   }
 };
