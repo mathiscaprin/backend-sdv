@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 require("dotenv").config();
 const cors = require("cors");
@@ -28,6 +29,7 @@ app.use(
     origin: true,
   }),
 );
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(apiLimiter);
 
 // Swagger UI

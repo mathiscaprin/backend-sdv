@@ -4,6 +4,10 @@ const Document = (dbInstance, DataTypes) => {
   class Document extends Model {
     static associate(models) {
       // Relations
+      this.belongsTo(models.Sinister, {
+        foreignKey: "sinister_id",
+        as: "sinister",
+      });
       this.hasMany(models.Sinister, {
         foreignKey: "cni_driver",
         as: "cniDriverSinisters",
@@ -44,9 +48,21 @@ const Document = (dbInstance, DataTypes) => {
         ),
         allowNull: false,
       },
+      label: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       path: {
         type: DataTypes.TEXT,
         allowNull: false,
+      },
+      sinister_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "Sinisters",
+          key: "id",
+        },
       },
       validated: {
         type: DataTypes.BOOLEAN,

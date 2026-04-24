@@ -12,6 +12,8 @@ const {
   getRequest,
   getHistory,
   createRequest,
+  createSinisterDocument,
+  getSinisterDocuments,
 } = require("../services/sinisters");
 
 router.get("/", getAllSinisters);
@@ -24,5 +26,7 @@ router.patch("/:id/documents", updateDocuments);
 router.get("/:id/request", getRequest);
 router.get("/:id/history", getHistory);
 router.post("/:id/create-request", createRequest);
+router.post("/:id/documents", createSinisterDocument);
+router.get("/:id/documents", getSinisterDocuments);
 
 module.exports = router;

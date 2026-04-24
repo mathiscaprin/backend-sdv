@@ -59,7 +59,7 @@ export default function SinistreDetailScreen() {
                 } as unknown as Blob)
             }
             setError(null);
-            fetchDocument('/sinistres/'+id+'/document', 'POST', formData, true)
+            fetchDocument('/sinisters/'+id+'/documents', 'POST', formData, true)
                 .then(response => console.log(response))
                 .catch(error => {
                     console.log(error),

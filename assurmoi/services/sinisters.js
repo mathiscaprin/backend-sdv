@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+const { IncomingForm } = require("formidable");
 const { Sinister, Request, History, Document } = require("../models");
 
 const getAllSinisters = async (req, res) => {
@@ -185,6 +188,98 @@ const updateDocuments = async (req, res) => {
   res.status(200).json({ sinister });
 };
 
+const createSinisterDocument = async (req, res) => {
+  const sinister = await Sinister.findByPk(req.params.id);
+  if (!sinister) return res.status(404).json({ message: "Sinister not found" });
+
+  const uploadDir = path.join(__dirname, "../uploads");
+  await fs.promises.mkdir(uploadDir, { recursive: true });
+
+  const form = new IncomingForm({
+    uploadDir,
+    keepExtensions: true,
+    multiples: false,
+    maxFileSize: 20 * 1024 * 1024,
+  });
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    const fileField = files.file;
+    const documentFile = Array.isArray(fileField) ? fileField[0] : fileField;
+    if (!documentFile) {
+      return res.status(400).json({ message: "Un fichier est requis" });
+    }
+
+    const originalName =
+      documentFile.originalFilename || path.basename(documentFile.filepath);
+    const safeName = `${Date.now()}-${originalName.replace(/[^a-zA-Z0-9_.-]/g, "_")}`;
+    const destinationPath = path.join(uploadDir, safeName);
+
+    try {
+      await fs.promises.rename(documentFile.filepath, destinationPath);
+    } catch (renameError) {
+      return res.status(500).json({
+        message: "Impossible de sauvegarder le fichier",
+        error: renameError.message,
+      });
+    }
+
+    let typeValue = fields.type;
+    if (Array.isArray(typeValue)) {
+      typeValue = typeValue[0];
+    }
+    if (typeof typeValue !== "string") {
+      typeValue = "DIAGNOSTIC_REPORT";
+    }
+    const type = typeValue.toUpperCase();
+    const validTypes = [
+      "CNI_DRIVER",
+      "VEHICLE_REGISTRATION_CERTIFICATE",
+      "INSURANCE_CERTIFICATE",
+      "DIAGNOSTIC_REPORT",
+      "CONTRACTOR_INVOICE",
+      "INSURED_RIB",
+    ];
+
+    if (!validTypes.includes(type)) {
+      return res
+        .status(400)
+        .json({ message: `Type de document invalide : ${type}` });
+    }
+
+    let labelValue = fields.label;
+    if (Array.isArray(labelValue)) {
+      labelValue = labelValue[0];
+    }
+    if (typeof labelValue !== "string") {
+      labelValue = null;
+    }
+
+    const document = await Document.create({
+      type,
+      path: `/uploads/${safeName}`,
+      label: labelValue,
+      sinister_id: sinister.id,
+    });
+
+    res.status(201).json({ document });
+  });
+};
+
+const getSinisterDocuments = async (req, res) => {
+  const sinister = await Sinister.findByPk(req.params.id);
+  if (!sinister) return res.status(404).json({ message: "Sinister not found" });
+
+  const documents = await Document.findAll({
+    where: { sinister_id: req.params.id },
+  });
+
+  res.status(200).json({ documents });
+};
+
 const getRequest = async (req, res) => {
   const sinister = await Sinister.findByPk(req.params.id, {
     include: [{ model: Request, as: "request" }],
@@ -219,6 +314,8 @@ module.exports = {
   deleteSinister,
   validateSinister,
   updateDocuments,
+  createSinisterDocument,
+  getSinisterDocuments,
   getRequest,
   getHistory,
   createRequest,
