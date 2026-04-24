@@ -1,18 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const {
-    getAllHistories,
-    getHistory,
-    createHistory,
-    updateHistory,
-    deleteHistory
-} = require('../services/history');
+  getAllHistories,
+  getHistory,
+  createHistory,
+  getHistoryByRequest,
+  getHistoryBySinister,
+  getHistoryByUser,
+} = require("../services/history");
 
-router.post('/', createHistory);
-router.get('/:id', getHistory);
-router.get('/', getAllHistories);
-router.delete('/:id', deleteHistory);
-router.put('/:id', updateHistory);
+router.get("/", getAllHistories);
+router.post("/", createHistory);
+router.get("/:id", getHistory);
+router.get("/request/:id", getHistoryByRequest);
+router.get("/sinister/:id", getHistoryBySinister);
+router.get("/user/:id", getHistoryByUser);
 
 module.exports = router;

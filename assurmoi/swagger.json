@@ -1,0 +1,2286 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Assurmoi",
+    "version": "1.0.0",
+    "description": "API pour la gestion des sinistres AssurMoi"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/api/users": {
+      "get": {
+        "summary": "Listes utilisateurs",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "description": "Exemple : CHARGE_SUIVI",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "firstname",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastname",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des utilisateurs"
+          }
+        },
+        "tags": ["users"]
+      },
+      "post": {
+        "summary": "Créer un utilisateur",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "username": "jdupont",
+                "email": "julie.dupont@assurmoi.fr",
+                "password": "Password123!",
+                "firstname": "Julie",
+                "lastname": "Dupont",
+                "role": "CHARGE_SUIVI",
+                "active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Utilisateur créé"
+          }
+        },
+        "tags": ["users"]
+      },
+      "put": {
+        "summary": "Mettre à jour un utilisateur",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "id": 1,
+                "username": "jdupont",
+                "email": "julie.dupont@assurmoi.fr",
+                "firstname": "Julie",
+                "lastname": "Dupont",
+                "role": "GESTIONNAIRE_PORTEFEUILLE",
+                "active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Utilisateur mis à jour"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "summary": "Voir un utilisateur",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilisateur trouvé"
+          }
+        },
+        "tags": ["users"]
+      },
+      "delete": {
+        "summary": "Suppression d'un utilisateur",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilisateur supprimé"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/api/users/{id}/actif": {
+      "patch": {
+        "summary": "Désactiver un utilisateur",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "active": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Statut utilisateur mis à jour"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/api/users/{id}/password": {
+      "patch": {
+        "summary": "Changement de mdp d'un user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "password": "NewPassword123!"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mot de passe changé"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "mot_de_passe": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "john.doe@gmail.com",
+                "mot_de_passe": "AdminPass123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connexion réussie"
+          }
+        },
+        "tags": ["auth"],
+        "security": []
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Logout",
+        "responses": {
+          "200": {
+            "description": "Déconnexion réussie"
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/api/auth/profil": {
+      "get": {
+        "summary": "Profil utilisateur connecté",
+        "responses": {
+          "200": {
+            "description": "Profil utilisateur"
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "summary": "Mot de passe oublié",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              },
+              "example": {
+                "email": "agent@assurmoi.fr"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email envoyé"
+          }
+        },
+        "tags": ["auth"],
+        "security": []
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "summary": "Réinitialisation mdp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "nouveau_mot_de_passe": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "token": "abc123",
+                "nouveau_mot_de_passe": "NouveauPassword123!"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mot de passe réinitialisé"
+          }
+        },
+        "tags": ["auth"],
+        "security": []
+      }
+    },
+    "/api/documents": {
+      "get": {
+        "summary": "Récupérer des documents",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Exemple : INSURANCE_CERTIFICATE",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validated",
+            "in": "query",
+            "description": "true ou false",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des documents"
+          }
+        },
+        "tags": ["documents"]
+      },
+      "post": {
+        "summary": "Ajouter un document",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "validated": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "type": "INSURANCE_CERTIFICATE",
+                "path": "/uploads/insurance_certificate.pdf",
+                "validated": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Document ajouté"
+          }
+        },
+        "tags": ["documents"]
+      }
+    },
+    "/api/documents/{id}": {
+      "get": {
+        "summary": "Récupérer un document",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document trouvé"
+          }
+        },
+        "tags": ["documents"]
+      },
+      "put": {
+        "summary": "Mettre à jour un document",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "validated": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "type": "CNI_DRIVER",
+                "path": "/uploads/new_cni.pdf",
+                "validated": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Document mis à jour"
+          }
+        },
+        "tags": ["documents"]
+      }
+    },
+    "/api/documents/{id}/validate": {
+      "patch": {
+        "summary": "Valider un document",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "validated": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "validated": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Document validé"
+          }
+        },
+        "tags": ["documents"]
+      }
+    },
+    "/api/documents/{id}/rejected": {
+      "patch": {
+        "summary": "Refuser un document",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "validated": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "validated": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Document refusé"
+          }
+        },
+        "tags": ["documents"]
+      }
+    },
+    "/api/sinisters": {
+      "get": {
+        "summary": "Récupérer les sinistres",
+        "parameters": [
+          {
+            "name": "validated",
+            "in": "query",
+            "description": "true ou false",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "driver_is_insured",
+            "in": "query",
+            "description": "true ou false",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "driver_responsability",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "driver_engaged_responsability",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "plate",
+            "in": "query",
+            "description": "Exemple : AB-123-CD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "driver_firstname",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "driver_lastname",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des sinistres"
+          }
+        },
+        "tags": ["sinisters"]
+      },
+      "post": {
+        "summary": "Ajouter un sinistre",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "plate": {
+                    "type": "string"
+                  },
+                  "driver_firstname": {
+                    "type": "string"
+                  },
+                  "driver_lastname": {
+                    "type": "string"
+                  },
+                  "driver_is_insured": {
+                    "type": "boolean"
+                  },
+                  "call_datetime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "sinister_datetime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "context": {
+                    "type": "string"
+                  },
+                  "driver_responsability": {
+                    "type": "boolean"
+                  },
+                  "driver_engaged_responsability": {
+                    "type": "integer"
+                  },
+                  "cni_driver": {
+                    "type": "integer"
+                  },
+                  "vehicle_registration_certificate": {
+                    "type": "integer"
+                  },
+                  "insurance_certificate": {
+                    "type": "integer"
+                  },
+                  "validated": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "plate": "AB-123-CD",
+                "driver_firstname": "Paul",
+                "driver_lastname": "Martin",
+                "driver_is_insured": true,
+                "call_datetime": "2026-01-20T16:00:00Z",
+                "sinister_datetime": "2026-01-20T14:30:00Z",
+                "context": "Collision à un carrefour",
+                "driver_responsability": true,
+                "driver_engaged_responsability": 50,
+                "cni_driver": 1,
+                "vehicle_registration_certificate": 2,
+                "insurance_certificate": 3,
+                "validated": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sinistre ajouté"
+          }
+        },
+        "tags": ["sinisters"]
+      }
+    },
+    "/api/sinisters/{id}": {
+      "get": {
+        "summary": "Récupérer un sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sinistre trouvé"
+          }
+        },
+        "tags": ["sinisters"]
+      },
+      "put": {
+        "summary": "Modifier un sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "plate": {
+                    "type": "string"
+                  },
+                  "driver_firstname": {
+                    "type": "string"
+                  },
+                  "driver_lastname": {
+                    "type": "string"
+                  },
+                  "driver_is_insured": {
+                    "type": "boolean"
+                  },
+                  "call_datetime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "sinister_datetime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "context": {
+                    "type": "string"
+                  },
+                  "driver_responsability": {
+                    "type": "boolean"
+                  },
+                  "driver_engaged_responsability": {
+                    "type": "integer"
+                  },
+                  "cni_driver": {
+                    "type": "integer"
+                  },
+                  "vehicle_registration_certificate": {
+                    "type": "integer"
+                  },
+                  "insurance_certificate": {
+                    "type": "integer"
+                  },
+                  "validated": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "plate": "AB-123-CD",
+                "driver_firstname": "Paul",
+                "driver_lastname": "Martin",
+                "driver_is_insured": true,
+                "call_datetime": "2026-01-20T16:00:00Z",
+                "sinister_datetime": "2026-01-20T14:30:00Z",
+                "context": "Collision arrière sur autoroute",
+                "driver_responsability": true,
+                "driver_engaged_responsability": 50,
+                "cni_driver": 1,
+                "vehicle_registration_certificate": 2,
+                "insurance_certificate": 3,
+                "validated": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sinistre modifié"
+          }
+        },
+        "tags": ["sinisters"]
+      },
+      "delete": {
+        "summary": "Supprimer un sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sinistre supprimé"
+          }
+        },
+        "tags": ["sinisters"]
+      }
+    },
+    "/api/sinisters/{id}/validate": {
+      "patch": {
+        "summary": "Valider un sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "validated": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "validated": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sinistre validé"
+          }
+        },
+        "tags": ["sinisters"]
+      }
+    },
+    "/api/sinisters/{id}/documents": {
+       "get": {
+        "summary": "Récupérer tous les documents liés à un sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "documents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "type": { "type": "string" },
+                          "label": { "type": "string" },
+                          "path": { "type": "string" },
+                          "validated": { "type": "boolean" },
+                          "sinister_id": { "type": "integer" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sinistre non trouvé"
+          }
+        },
+        "tags": ["sinisters"]
+      },
+      "post": {
+        "summary": "Associer ou remplacer les documents du sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cni_driver": {
+                    "type": "integer"
+                  },
+                  "vehicle_registration_certificate": {
+                    "type": "integer"
+                  },
+                  "insurance_certificate": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "cni_driver": 10,
+                "vehicle_registration_certificate": 11,
+                "insurance_certificate": 12
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Documents associés"
+          }
+        },
+        "tags": ["sinisters"]
+      }
+    },
+    "/api/sinisters/{id}/request": {
+      "get": {
+        "summary": "Récupérer le dossier lié au sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dossier trouvé"
+          }
+        },
+        "tags": ["sinisters"]
+      }
+    },
+    "/api/sinisters/{id}/history": {
+      "get": {
+        "summary": "Récupérer l'historique d'un sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historique du sinistre"
+          }
+        },
+        "tags": ["sinisters"]
+      }
+    },
+    "/api/sinisters/{id}/create-request": {
+      "post": {
+        "summary": "Créer un dossier à partir d'un sinistre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "INITIALIZED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Dossier créé"
+          }
+        },
+        "tags": ["sinisters"]
+      }
+    },
+    "/api/requests/{id}/expertise/plan": {
+      "patch": {
+        "summary": "Ajouter une date planifiée d'expertise",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expertise_plan_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "expertise_plan_date": "2026-01-21T09:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Date planifiée ajoutée"
+          }
+        },
+        "tags": ["requests", "expertises"]
+      }
+    },
+    "/api/requests/{id}/expertise/effective": {
+      "patch": {
+        "summary": "Ajouter une date effective d'expertise",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expertise_effective_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "expertise_effective_date": "2026-01-22T10:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Date effective ajoutée"
+          }
+        },
+        "tags": ["requests", "expertises"]
+      }
+    },
+    "/api/requests/{id}/expertise/report": {
+      "patch": {
+        "summary": "Recevoir le rapport d'expertise",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expertise_report_recieved": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "diagnostic": {
+                    "type": "string",
+                    "enum": ["CASE1", "CASE2"]
+                  },
+                  "diagnostic_report_file": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "expertise_report_recieved": "2026-01-25T10:00:00Z",
+                "diagnostic": "CASE1",
+                "diagnostic_report_file": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rapport d'expertise reçu"
+          }
+        },
+        "tags": ["requests", "expertises"]
+      }
+    },
+    "/api/requests/{id}/case1/service-plan": {
+      "patch": {
+        "summary": "Ajouter une date de planification de l'intervention",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_date_of_service_plan": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case1_date_of_service_plan": "2026-01-23T09:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Date de planification ajoutée"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/pickup-plan": {
+      "patch": {
+        "summary": "Planifier la prise en charge du véhicule",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_pickup_plan_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case1_pickup_plan_date": "2026-01-23T08:30:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prise en charge planifiée"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/pickup-effective": {
+      "patch": {
+        "summary": "Enregistrer la prise en charge effective",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_pickup_effective_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case1_pickup_effective_date": "2026-01-23T08:45:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prise en charge effective enregistrée"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/service-start": {
+      "patch": {
+        "summary": "Enregistrer le début de l'intervention",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_date_of_service_effective": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case1_date_of_service_effective": "2026-01-23T09:15:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Début d'intervention enregistré"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/service-end": {
+      "patch": {
+        "summary": "Enregistrer la fin de l'intervention",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_end_date_of_service": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case1_end_date_of_service": "2026-01-25T17:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fin d'intervention enregistrée"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/return-plan": {
+      "patch": {
+        "summary": "Planifier la restitution du véhicule",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_return_date_plan": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case1_return_date_plan": "2026-01-26T10:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Restitution planifiée"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/return-effective": {
+      "patch": {
+        "summary": "Enregistrer la restitution effective",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_return_date_effective": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case1_return_date_effective": "2026-01-26T10:20:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Restitution effective enregistrée"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/invoice-received": {
+      "patch": {
+        "summary": "Enregistrer la réception de la facture prestataire",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_contractor_invoice_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "case1_contractor_invoice": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "case1_contractor_invoice_date": "2026-01-26T15:00:00Z",
+                "case1_contractor_invoice": 8
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Réception de facture enregistrée"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/invoice-paid": {
+      "patch": {
+        "summary": "Enregistrer le paiement de la facture prestataire",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_date_contractor_invoice_paid": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case1_date_contractor_invoice_paid": "2026-01-27T11:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paiement de facture enregistré"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case1/third-party-invoice-paid": {
+      "patch": {
+        "summary": "Enregistrer la refacturation tiers payée",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case1_third_party_invoice_paid": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "case1_third_party_invoice_paid": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refacturation tiers enregistrée"
+          }
+        },
+        "tags": ["requests", "case1"]
+      }
+    },
+    "/api/requests/{id}/case2/estimated-compensation": {
+      "patch": {
+        "summary": "Enregistrer le montant estimé d'indemnisation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case2_estimated_compensation": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                }
+              },
+              "example": {
+                "case2_estimated_compensation": 8500
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Montant estimé enregistré"
+          }
+        },
+        "tags": ["requests", "case2"]
+      }
+    },
+    "/api/requests/{id}/case2/approved-compensation": {
+      "patch": {
+        "summary": "Enregistrer l'accord client",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case2_approved_compensation": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "case2_approved_compensation": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accord client enregistré"
+          }
+        },
+        "tags": ["requests", "case2"]
+      }
+    },
+    "/api/requests/{id}/case2/pickup-plan": {
+      "patch": {
+        "summary": "Planifier la prise en charge du véhicule",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case2_pickup_plan_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case2_pickup_plan_date": "2026-01-24T09:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prise en charge planifiée"
+          }
+        },
+        "tags": ["requests", "case2"]
+      }
+    },
+    "/api/requests/{id}/case2/rib": {
+      "patch": {
+        "summary": "Associer le RIB assuré",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case2_insured_rib": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "case2_insured_rib": 9
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "RIB associé"
+          }
+        },
+        "tags": ["requests", "case2"]
+      }
+    },
+    "/api/requests/{id}/case2/pickup-effective": {
+      "patch": {
+        "summary": "Enregistrer la prise en charge effective",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case2_pickup_effective_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case2_pickup_effective_date": "2026-01-24T09:30:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prise en charge effective enregistrée"
+          }
+        },
+        "tags": ["requests", "case2"]
+      }
+    },
+    "/api/requests/{id}/case2/compensation-payment": {
+      "patch": {
+        "summary": "Enregistrer le paiement de l'indemnisation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case2_compensation_payment_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "case2_compensation_payment_date": "2026-01-25T11:00:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paiement d'indemnisation enregistré"
+          }
+        },
+        "tags": ["requests", "case2"]
+      }
+    },
+    "/api/requests/{id}/case2/third-party-invoice-paid": {
+      "patch": {
+        "summary": "Enregistrer le recouvrement tiers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "case2_third_party_invoice_paid": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "case2_third_party_invoice_paid": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recouvrement tiers enregistré"
+          }
+        },
+        "tags": ["requests", "case2"]
+      }
+    },
+    "/api/requests": {
+      "get": {
+        "summary": "Récupérer les dossiers",
+        "parameters": [
+          {
+            "name": "sinister_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Exemple : EXPERTISE_PLANNED",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "closed",
+            "in": "query",
+            "description": "true ou false",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des dossiers"
+          }
+        },
+        "tags": ["requests"]
+      },
+      "post": {
+        "summary": "Ajouter un dossier",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sinister_id": {
+                    "type": "integer"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "closed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "sinister_id": 1,
+                "status": "INITIALIZED",
+                "closed": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Dossier ajouté"
+          }
+        },
+        "tags": ["requests"]
+      }
+    },
+    "/api/requests/{id}": {
+      "get": {
+        "summary": "Récupérer un dossier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dossier trouvé"
+          }
+        },
+        "tags": ["requests"]
+      },
+      "put": {
+        "summary": "Modifier un dossier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sinister_id": {
+                    "type": "integer"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "expertise_plan_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "expertise_effective_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "expertise_report_recieved": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "diagnostic": {
+                    "type": "string"
+                  },
+                  "diagnostic_report_file": {
+                    "type": "integer"
+                  },
+                  "closed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "sinister_id": 1,
+                "status": "EXPERTISE_DONE",
+                "expertise_plan_date": "2026-01-21T09:00:00Z",
+                "expertise_effective_date": "2026-01-22T10:00:00Z",
+                "expertise_report_recieved": "2026-01-22T15:00:00Z",
+                "diagnostic": "CASE1",
+                "diagnostic_report_file": 5,
+                "closed": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dossier modifié"
+          }
+        },
+        "tags": ["requests"]
+      }
+    },
+    "/api/requests/{id}/status": {
+      "patch": {
+        "summary": "Changer le statut d'un dossier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "EXPERTISE_PLANNED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Statut changé"
+          }
+        },
+        "tags": ["requests"]
+      }
+    },
+    "/api/requests/{id}/close": {
+      "patch": {
+        "summary": "Fermer un dossier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "closed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "closed": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dossier fermé"
+          }
+        },
+        "tags": ["requests"]
+      }
+    },
+    "/api/requests/{id}/diagnostic": {
+      "patch": {
+        "summary": "Changer le diagnostic d'un dossier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "diagnostic": {
+                    "type": "string"
+                  },
+                  "diagnostic_report_file": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "diagnostic": "CASE1",
+                "diagnostic_report_file": 5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Diagnostic changé"
+          }
+        },
+        "tags": ["requests"]
+      }
+    },
+    "/api/requests/{id}/history": {
+      "get": {
+        "summary": "Récupérer l'historique d'un dossier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historique du dossier"
+          }
+        },
+        "tags": ["history"]
+      }
+    },
+    "/api/history": {
+      "get": {
+        "summary": "Récupérer les historiques",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sinister_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des historiques"
+          }
+        },
+        "tags": ["history"]
+      },
+      "post": {
+        "summary": "Ajouter un historique",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request_id": {
+                    "type": "integer"
+                  },
+                  "sinister_id": {
+                    "type": "integer"
+                  },
+                  "user_id": {
+                    "type": "integer"
+                  },
+                  "update_details": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "example": {
+                "request_id": 1,
+                "sinister_id": 1,
+                "user_id": 3,
+                "update_details": "Statut du dossier modifié : EXPERTISE_PLANNED",
+                "createdAt": "2026-01-21T09:05:00Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Historique ajouté"
+          }
+        },
+        "tags": ["history"]
+      }
+    },
+    "/api/history/{id}": {
+      "get": {
+        "summary": "Récupérer un historique",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historique trouvé"
+          }
+        },
+        "tags": ["history"]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ]
+}

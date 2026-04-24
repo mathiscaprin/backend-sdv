@@ -1,8 +1,9 @@
-import fetchData from "@/hooks/fetchData";
+import fetchData, {fetchDocument} from "@/hooks/fetchData";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
-import { Card, Switch, Text } from "react-native-paper";
+import { Platform, ScrollView, View } from "react-native";
+import { Button, Card, HelperText, Switch, Text, TextInput } from "react-native-paper";
+import * as DocumentPicker from 'expo-document-picker';
 
 type SinistreType = {
   id: number | string,
@@ -18,15 +19,62 @@ type SinistreType = {
 export default function SinistreDetailScreen() {
     // implémenter un state local pour charger le sinistre localement
     const [ sinistre, setSinistre ] = useState<SinistreType>()
+    // Store contenant le document temporaire avant envoi du formulaire
+    const [ pickedFile, setPickedFile ] = useState<DocumentPicker.DocumentPickerAsset | null>(null)
+    // store pour le libellé du document
+    const [ documentLabel, setDocumentLabel ] = useState('')
+    // gestion de mes erreurs
+    const [ error, setError ] = useState<string | null>(null)
 
     // récupérer le paramètre d'URL
     const { id } = useLocalSearchParams<{ id: string }>();
 
+   // fonction de chargement d'un fichier
+    const pickDocument = async () => {
+        const result = await DocumentPicker.getDocumentAsync({
+            multiple: false,
+        })
+        if(result.canceled) {
+            return;
+        }
+        // TODO : revoir la structure du result
+        setPickedFile(result.assets[0]);
+    }
+
+    // Soumission du formulaire :
+    const submitForm = () => {
+        const formData = new FormData();
+        formData.append("label", documentLabel);
+        if(pickedFile) {
+            if(Platform.OS === "web") {
+                // cas de la version web
+                const webfile = (pickedFile as DocumentPicker.DocumentPickerAsset & {file?: File}).file;
+                if (webfile) formData.append("file", webfile)
+            } else {
+                // toutes les autres plateformes
+                formData.append("file", {
+                    uri: pickedFile.uri,
+                    name: pickedFile.name,
+                    type: pickedFile.mimeType || 'application/octet-stream'
+                } as unknown as Blob)
+            }
+            setError(null);
+            fetchDocument('/sinistres/'+id+'/document', 'POST', formData, true)
+                .then(response => console.log(response))
+                .catch(error => {
+                    console.log(error),
+                    setError(error.message)
+                })
+        } else {
+            setError('Pas de fichier sélectionné');
+        }
+    }
+
     // fetch récupérer le sinistre courant
     useEffect(() => {
-        fetchData('/sinistres/'+id, 'GET', {}, true)
+        fetchData('/sinisters/'+id, 'GET', {}, true)
             .then(data => {
-                setSinistre(data)
+                setSinistre(data.sinister)
             })
             .catch(err => {
                 console.log('Error on get sinistre ' + err.message)
@@ -59,6 +107,25 @@ export default function SinistreDetailScreen() {
                         disabled
                         value={sinistre.driver_responsability}
                     />
+                </Card.Content>
+            </Card>
+            <Card>
+                <Card.Content>
+                    <Text variant="titleMedium">Envoyer un document :</Text>
+                    <TextInput
+                        label="Libellé du document"
+                        onChangeText={setDocumentLabel}
+                    />
+                    <Button
+                        mode="outlined"
+                        onPress={pickDocument}
+                    >
+                        Fichier : ...
+                    </Button>
+                    <HelperText type="error" visible={Boolean(error)}>
+                        {error}
+                    </HelperText>
+                    <Button onPress={submitForm}>Envoyer le document</Button>
                 </Card.Content>
             </Card>
         </ScrollView>

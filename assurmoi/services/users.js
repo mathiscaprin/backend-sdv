@@ -1,119 +1,111 @@
-const { Op } = require('sequelize');
-const { User, dbInstance } = require('../models');
-const bcrypt = require('bcrypt');
-require('dotenv').config();
+const { User } = require("../models");
+const bcrypt = require("bcrypt");
 
-const  getAllUsers = async (req, res) => {
-    let queryParam = {};
-    if(req.query?.search) {
-        queryParam = {
-            where: {
-                firstname: {
-                    [Op.like]: `%${req.query.search}%`
-                }
-            }
-        }
-    }
-    const users = await User.findAll(queryParam);
-    res.status(200).json({
-        users
-    });
-}
+const BCRYPT_SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUNDS) || 12;
+
+const getAllUsers = async (req, res) => {
+  const { role, active, email, username, firstname, lastname } = req.query;
+  const where = {};
+  if (role) where.role = role;
+  if (active !== undefined) where.active = active === "true";
+  if (email) where.email = email;
+  if (username) where.username = username;
+  if (firstname) where.firstname = firstname;
+  if (lastname) where.lastname = lastname;
+  const users = await User.findAll({ where });
+  res.status(200).json({
+    users,
+  });
+};
 
 const getUser = async (req, res) => {
-    const user = await User.findOne({
-        where: { id: req.params.id}
-    })
-    res.status(200).json({
-        user
-    });
-}
+  const user = await User.findByPk(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  res.status(200).json({
+    user,
+  });
+};
 
 const createUser = async (req, res) => {
-    const transaction = await dbInstance.transaction();
-    try {
-        const { username, firstname, lastname, email, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, parseInt(process.env.BCRYPT_SALT));
-        const user = await User.create({
-            username,
-            firstname,
-            lastname,
-            email,
-            password : hashedPassword
-        }, { transaction });
-        
-        transaction.commit();
-        return res.status(201).json({
-            user: user.clean()
-        });
-    } catch (error) {
-        transaction.rollback();
-        return res.status(400).json({
-            message: "Error on user creation",
-            stacktrace: error.errors
-        });
-    }
-}
+  const { password, ...userData } = req.body;
+  if (!password) {
+    return res.status(400).json({ message: "Password is required" });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+  const user = await User.create({ ...userData, password: hashedPassword });
+  res.status(201).json({
+    user: {
+      ...user.get({ plain: true }),
+      password: undefined,
+    },
+  });
+};
 
 const updateUser = async (req, res) => {
-    const transaction = await dbInstance.transaction();
-    try {
-        const { username, firstname, lastname, email, password } = req.body;
-        const user_id = req.params.id;
+  // Assuming id is in body for PUT /api/users
+  const { id, ...updateData } = req.body;
+  const user = await User.findByPk(id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  await user.update(updateData);
+  res.status(200).json({
+    message: "Successfully updated",
+    user,
+  });
+};
 
-        const user = await User.findOne({
-            where: { id: user_id }
-        }, { transaction });
-        user.firstname = firstname;
-        user.lastname = lastname;
-        user.email = email;
-        user.password = password;
-        await user.save();
-
-        await transaction.commit();
-        return res.status(200).json({
-            message: "Successfully updated",
-            user
-        });
-    } catch (error) {
-        await transaction.rollback();
-        return res.status(400).json({
-            message: "Error on user update",
-            stacktrace: error.errors
-        });
-    }
-}
+const deleteUser = async (req, res) => {
+  const user = await User.findByPk(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  await user.destroy();
+  res.status(200).json({
+    message: "Successfully deleted",
+  });
+};
 
 const deactivateUser = async (req, res) => {
-    const transaction = await dbInstance.transaction();
-    try {
-        const user_id = req.params.id;
+  const user = await User.findByPk(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  await user.update({ active: req.body.active });
+  res.status(200).json({
+    message: "User status updated",
+    user,
+  });
+};
 
-        const user = await User.update({
-            active: false
-        }, {
-            where: { id: user_id },
-            transaction
-        });
+const changePassword = async (req, res) => {
+  const user = await User.findByPk(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
-        await transaction.commit();
-        return res.status(200).json({
-            message: "Successfully deactivated",
-            user
-        });
-    } catch (error) {
-        await transaction.rollback();
-        return res.status(400).json({
-            message: "Error on user deactivation",
-            stacktrace: error.errors
-        });
-    }
-}
+  const { password } = req.body;
+  if (!password) {
+    return res.status(400).json({ message: "New password is required" });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+  await user.update({ password: hashedPassword });
+
+  res.status(200).json({
+    message: "Password changed successfully",
+  });
+};
 
 module.exports = {
-    getAllUsers,
-    getUser,
-    createUser,
-    updateUser,
-    deactivateUser
-}
+  getAllUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  deactivateUser,
+  changePassword,
+};

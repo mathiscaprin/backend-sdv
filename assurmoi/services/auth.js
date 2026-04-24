@@ -1,133 +1,109 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { User } = require('../models');
-require('dotenv').config();
+const { User } = require("../models");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { sendEmail } = require("./mail");
+
+const JWT_SECRET = process.env.JWT_SECRET || "change-this-secret";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
+const BCRYPT_SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUNDS) || 12;
 
 const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  const { email, mot_de_passe } = req.body;
 
-        const user = await User.findOne({ 
-            where: { email: email } 
-        });
-        
-        // En production, renvoyer le même message pour éviter de divulguer des informations
-        if (!user) return res.status(401).json({ message: "User not found" });
+  if (!email || !mot_de_passe) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) return res.status(401).json({message: "Incorrect password"});
-        
-        const token = jwt.sign({user: user.clean()}, process.env.JWT_SECRET, { expiresIn: '1h' });
+  const user = await User.findOne({ where: { email } });
 
-        user.token = token;
-        user.save();
+  if (!user) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
 
-        return res.status(200).json({
-            token: token,
-            user: user.clean()
-        });
-    } catch (err) {
-        return res.status(400).json({
-            message: "Error connection",
-            stacktrace: err.errors
-        });
-    }
-};
+  const passwordMatch = await bcrypt.compare(mot_de_passe, user.password);
+  if (!passwordMatch) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
 
-const refresh = async(req, res) => {
-    try {
-        const newToken = jwt.sign({ 
-            id: req.user.id, 
-            email: req.user.email 
-        }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        
-        req.user.token = newToken;
-        req.user.save();
-        
-        return res.status(200).json({
-            message: "Token refreshed successfully",
-            token: newToken,
-            user: req.user.clean()
-        });
-        
-    } catch (error) {
-        return res.status(401).json({
-            message: "Invalid or expired token"
-        });
-    }
+  if (!user.active) {
+    return res.status(403).json({ message: "User is deactivated" });
+  }
+
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  await user.update({ two_step_code: code });
+
+  /*try {
+    await sendEmail(
+      user.email,
+      "Code de vérification 2FA",
+      `Votre code de vérification est : ${code}`,
+    );
+  } catch (error) {
+    return res.status(500).json({ message: "Erreur envoi email" });
+  }*/
+
+  const token = jwt.sign({ id: user.id, type: "2fa" }, JWT_SECRET, {
+    expiresIn: "5m",
+  });
+
+  res.status(200).json({ /*message: "Code 2FA envoyé par email",*/ token });
 };
 
 const logout = async (req, res) => {
-    try {
-        req.user.token = null;
-        req.user.save();
-        
-        return res.status(200).json({ message: "Logout successful" });
-    } catch (error) {
-        return res.status(401).json({ message: "Logout failed" });
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(400).json({ message: "No token provided" });
+  }
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    const user = await User.findByPk(payload.id);
+    if (user) {
+      // Invalidate token on server side to support logout + blacklist
+      await user.update({ token: null });
     }
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+
+  res.status(200).json({ message: "Logged out" });
 };
 
-const verify2FA = async (req, res) => {    
-    const token = req.headers.authorization;
-    
-    if (!token) {
-        return res.status(400).json({
-            message: "Token is required"
-        });
-    }
-    
-    if (token === "fake-jwt-token-12345") {
-        return res.status(200).json({
-            message: "Token valid",
-            user: {
-                id: 1,
-                username: "testuser",
-                email: "test@example.com"
-            }
-        });
-    }
-    
-    return res.status(401).json({
-        message: "Invalid token"
+const getProfile = async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "No token" });
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    const user = await User.findByPk(payload.id, {
+      attributes: { exclude: ["password", "token"] },
     });
+
+    if (!user || !user.active) {
+      return res.status(404).json({ message: "User not found or inactive" });
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(401).json({ message: "Invalid or expired token" });
+  }
 };
 
-const forgotPassword = async (req, res) => {    
-    const { email } = req.body;
-
-    return res.status(200).json({
-        message: "Password reset email sent",
-        email: email,
-        resetToken: "fake-reset-token-67890"
-    });
+const forgotPassword = async (req, res) => {
+  // Implement email sending logic
+  res.status(200).json({ message: "Password reset email sent" });
 };
 
 const resetPassword = async (req, res) => {
-    const { password } = req.body;
-    const token = req.headers.authorization;
-    
-    if (!token || !password) {
-        return res.status(400).json({
-            message: "Token and new password are required"
-        });
-    }
-    if (token === "Bearer fake-reset-token-67890") {
-        return res.status(200).json({
-            message: "Password reset successful"
-        });
-    }
-    
-    return res.status(401).json({
-        message: "Invalid or expired reset token"
-    });
+  const { token, nouveau_mot_de_passe } = req.body;
+  // Verify token and update password
+  res.status(200).json({ message: "Password reset successfully" });
 };
 
 module.exports = {
-    login,
-    logout,
-    refresh,
-    verify2FA,
-    forgotPassword,
-    resetPassword
+  login,
+  logout,
+  getProfile,
+  forgotPassword,
+  resetPassword,
 };

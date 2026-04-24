@@ -1,18 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const {
-    getAllDocuments,
-    getDocument,
-    createDocument,
-    updateDocument,
-    deleteDocument
-} = require('../services/documents');
+  getAllDocuments,
+  getDocument,
+  createDocument,
+  updateDocument,
+  validateDocument,
+  rejectDocument,
+} = require("../services/documents");
 
-router.post('/', createDocument);
-router.get('/:id', getDocument);
-router.get('/', getAllDocuments);
-router.delete('/:id', deleteDocument);
-router.put('/:id', updateDocument);
+router.get("/", getAllDocuments);
+router.post("/", createDocument);
+router.get("/:id", getDocument);
+router.put("/:id", updateDocument);
+router.patch("/:id/validate", validateDocument);
+router.patch("/:id/rejected", rejectDocument);
 
 module.exports = router;

@@ -19,9 +19,9 @@ export default function Index() {
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    fetchData('/sinistres', 'GET', {}, true)
+    fetchData('/sinisters', 'GET', {}, true)
       .then(data => {
-        setSinistres(data)
+        setSinistres(data.sinisters)
         console.log('DATA LOADED ', data)
       })
   }, [])

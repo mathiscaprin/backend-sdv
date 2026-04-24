@@ -20,13 +20,13 @@ export default function LoginScreen() {
 
     const login = async () => {
         try {
-            const { token } = await fetchData('/login', 'POST', { username, password }, false)
+            const { token } = await fetchData('/auth/login', 'POST', { email:username, mot_de_passe:password }, false)
             // const response = await fetch('http://localhost:3000/login', {
             //     method: "POST",
             //     headers: { "Content-type": "application/json" },
             //     body: JSON.stringify({
-            //         username,
-            //         password
+            //         email: username,
+            //         mot_de_passe: password
             //     })
             // })
             // console.log('Login ', response)
@@ -34,7 +34,8 @@ export default function LoginScreen() {
             // setError(null)
             // const { token } = await response.json();
             await AsyncStorage.setItem('token', token)
-            const { user } = jwtDecode<JwtPayload>(token)
+            console.log('Token ', token)
+            const user = jwtDecode<JwtPayload>(token)
             setUser(user)
             router.push({ pathname: '/' })
         } catch(err: any) {

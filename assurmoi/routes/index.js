@@ -13,7 +13,7 @@ function initRoutes(app) {
   app.use("/api/requests", requestRoutes);
   app.use("/api/history", historyRoutes);
 
-  app.get(
+  app.use(
     "/",
     (req, res, next) => {
       // Middleware
